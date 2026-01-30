@@ -1,0 +1,13 @@
+{
+  "product": "ModelA",
+  "condition": "Test_A",
+  "shot_no": 1,
+  "save_path": "./captured_images",
+  "save_mode": 2,
+  "light_value": 180,
+  "sequence_start": 180,
+  "sequence_end": 120,
+  "sequence_step": -10,
+  "camera_width": 200,
+  "camera_height": 150
+}

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision System Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 10px;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .status-item .value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: auto;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-danger {
+            background: #E91E63;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #C2185B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-area {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(4, auto);
+            gap: 15px;
+            width: fit-content;
+            max-width: 100%;
+            position: relative;
+            justify-content: start;
+        }
+
+        .camera-item {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            width: 400px;
+            height: 300px;
+            min-width: 150px;
+            min-height: 100px;
+        }
+
+        .camera-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .camera-resize-handle {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(102, 126, 234, 0.8);
+            border-radius: 8px;
+            cursor: nwse-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: background 0.2s;
+        }
+        
+        .camera-resize-handle:hover {
+            background: rgba(102, 126, 234, 1);
+        }
+        
+        .camera-resize-handle::before {
+            content: '↘';
+        }
+
+        .camera-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .sequence-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .sequence-controls input {
+            text-align: center;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .camera-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> 데이터 취득UI</h1> 
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="label">카메라 상태</div>
+                    <div class="value" id="camera-status">연결 중...</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">조명 상태</div>
+                    <div class="value" id="light-status">연결 중...</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">현재 밝기</div>
+                    <div class="value" id="current-light">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="sidebar">
+                <!-- 기본 설정 -->
+                <div class="panel">
+                    <h2>📋 기본 설정</h2>
+                    <div class="alert alert-success" id="success-alert"></div>
+                    <div class="alert alert-error" id="error-alert"></div>
+                    
+                    <div class="form-group">
+                        <label>제품명 (Product)</label>
+                        <input type="text" id="product" value="ModelA">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>검사 조건 (Condition)</label>
+                        <input type="text" id="condition" value="Test_A">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>촬영 번호 (Shot No.)</label>
+                        <input type="number" id="shot-no" value="1" min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>저장 경로</label>
+                        <input type="text" id="save-path" value="./captured_images">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>카메라 저장 옵션</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" name="save-mode" value="1" id="mode1">
+                                <label for="mode1">Cam 3 저장 안함 (1, 2, 4만)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="save-mode" value="2" id="mode2" checked>
+                                <label for="mode2">Cam 3도 저장하기 (전체)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" name="save-mode" value="3" id="mode3">
+                                <label for="mode3">Cam 3만 저장하기</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="saveSettings()">💾 설정 저장</button>
+                </div>
+
+                <!-- 조명 제어 -->
+                <div class="panel">
+                    <h2>💡 조명 제어</h2>
+                    <div class="form-group">
+                        <label>밝기 값 (0-255)</label>
+                        <input type="number" id="light-value" value="100" min="0" max="255">
+                    </div>
+                    <button class="btn btn-primary" onclick="setLight()">💡 조명 값 적용</button>
+                </div>
+
+                <!-- 자동 시퀀스 -->
+                <div class="panel">
+                    <h2>🔄 자동 시퀀스</h2>
+                    <div class="form-group">
+                        <label>시작 (Start)</label>
+                        <input type="number" id="seq-start" value="30" min="0" max="255">
+                    </div>
+                    <div class="form-group">
+                        <label>종료 (End)</label>
+                        <input type="number" id="seq-end" value="120" min="0" max="255">
+                    </div>
+                    <div class="form-group">
+                        <label>스텝 (Step)</label>
+                        <input type="number" id="seq-step" value="10" min="-255" max="255">
+                        <small style="color: #666;">* 음수 입력 시 역순 촬영</small>
+                    </div>
+                    <button class="btn btn-primary" onclick="startSequence()">🔄 시퀀스 시작</button>
+                </div>
+
+                <!-- 촬영 버튼 -->
+                <div class="panel">
+                    <h2>📸 촬영</h2>
+                    <button class="btn btn-danger" onclick="captureImage()">📸 현재 설정으로 1회 촬영</button>
+                </div>
+            </div>
+
+            <!-- 카메라 미리보기 -->
+            <div class="panel">
+                <h2>📹 카메라 미리보기</h2>
+                <div class="preview-area">
+                    <div class="camera-grid" id="camera-grid">
+                        <div class="camera-item" id="cam-item-1">
+                            <div class="camera-label">CAM 1</div>
+                            <img id="cam1" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%23fff' text-anchor='middle' dominant-baseline='middle'%3ELoading...%3C/text%3E%3C/svg%3E" alt="Camera 1">
+                        </div>
+                        <div class="camera-item" id="cam-item-2">
+                            <div class="camera-label">CAM 2</div>
+                            <img id="cam2" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%23fff' text-anchor='middle' dominant-baseline='middle'%3ELoading...%3C/text%3E%3C/svg%3E" alt="Camera 2">
+                        </div>
+                        <div class="camera-item" id="cam-item-3">
+                            <div class="camera-label">CAM 3</div>
+                            <img id="cam3" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%23fff' text-anchor='middle' dominant-baseline='middle'%3ELoading...%3C/text%3E%3C/svg%3E" alt="Camera 3">
+                        </div>
+                        <div class="camera-item" id="cam-item-4">
+                            <div class="camera-label">CAM 4</div>
+                            <img id="cam4" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' fill='%23fff' text-anchor='middle' dominant-baseline='middle'%3ELoading...%3C/text%3E%3C/svg%3E" alt="Camera 4">
+                        </div>
+                    </div>
+                    <div class="camera-resize-handle" id="camera-resize-handle" title="드래그하여 모든 카메라 크기 조정"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let settings = {};
+
+        // WebSocket 연결
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/preview`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('WebSocket 연결됨');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'preview') {
+                    updatePreview(data.cameras);
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket 오류:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket 연결 종료, 재연결 시도...');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // 프리뷰 업데이트
+        function updatePreview(cameras) {
+            for (let camId = 1; camId <= 4; camId++) {
+                const img = document.getElementById(`cam${camId}`);
+                if (cameras[camId]) {
+                    img.src = `data:image/jpeg;base64,${cameras[camId]}`;
+                }
+            }
+        }
+
+        // 상태 업데이트
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                document.getElementById('camera-status').textContent = 
+                    data.cameras_available ? `✅ ${data.cameras_count}개 연결` : '❌ 연결 안됨';
+                document.getElementById('light-status').textContent = 
+                    data.lights_connected > 0 ? `✅ ${data.lights_connected}개 연결` : '❌ 연결 안됨';
+                document.getElementById('current-light').textContent = data.settings.light_value;
+                
+                // 설정 동기화
+                settings = data.settings;
+                document.getElementById('product').value = settings.product || '';
+                document.getElementById('condition').value = settings.condition || '';
+                document.getElementById('shot-no').value = settings.shot_no || 1;
+                document.getElementById('save-path').value = settings.save_path || '';
+                document.getElementById('light-value').value = settings.light_value || 100;
+                
+                // 시퀀스 설정 로드
+                if (settings.sequence_start !== undefined) {
+                    document.getElementById('seq-start').value = settings.sequence_start;
+                }
+                if (settings.sequence_end !== undefined) {
+                    document.getElementById('seq-end').value = settings.sequence_end;
+                }
+                if (settings.sequence_step !== undefined) {
+                    document.getElementById('seq-step').value = settings.sequence_step;
+                }
+                
+                // 카메라 크기 로드
+                if (settings.camera_width && settings.camera_height) {
+                    setCameraSize(settings.camera_width, settings.camera_height);
+                }
+                
+                const saveMode = settings.save_mode || 2;
+                document.getElementById(`mode${saveMode}`).checked = true;
+            } catch (error) {
+                console.error('상태 업데이트 오류:', error);
+            }
+        }
+
+        // 설정 저장
+        async function saveSettings() {
+            try {
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        product: document.getElementById('product').value,
+                        condition: document.getElementById('condition').value,
+                        shot_no: parseInt(document.getElementById('shot-no').value),
+                        save_path: document.getElementById('save-path').value,
+                        save_mode: parseInt(document.querySelector('input[name="save-mode"]:checked').value)
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('success', '설정이 저장되었습니다.');
+                }
+            } catch (error) {
+                showAlert('error', '설정 저장 실패: ' + error.message);
+            }
+        }
+
+        // 조명 설정
+        async function setLight() {
+            try {
+                const value = parseInt(document.getElementById('light-value').value);
+                if (value < 0 || value > 255) {
+                    showAlert('error', '조명 값은 0-255 사이여야 합니다.');
+                    return;
+                }
+                
+                const response = await fetch('/api/light', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({value: value})
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('success', `조명이 ${data.light_value}로 설정되었습니다.`);
+                    updateStatus();
+                }
+            } catch (error) {
+                showAlert('error', '조명 설정 실패: ' + error.message);
+            }
+        }
+        
+        // 조명 값 변경 시 자동 저장
+        document.addEventListener('DOMContentLoaded', () => {
+            const lightInput = document.getElementById('light-value');
+            let lightTimeout;
+            lightInput.addEventListener('input', () => {
+                clearTimeout(lightTimeout);
+                lightTimeout = setTimeout(() => {
+                    if (lightInput.value >= 0 && lightInput.value <= 255) {
+                        setLight();
+                    }
+                }, 1000); // 1초 후 자동 저장
+            });
+            
+            // 시퀀스 값 변경 시 자동 저장 (백엔드에 저장만, 실행 안함)
+            ['seq-start', 'seq-end', 'seq-step'].forEach(id => {
+                const input = document.getElementById(id);
+                let timeout;
+                input.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(async () => {
+                        // 시퀀스 값만 백엔드에 저장 (실행 안함)
+                        const start = parseInt(document.getElementById('seq-start').value) || 30;
+                        const end = parseInt(document.getElementById('seq-end').value) || 120;
+                        const step = parseInt(document.getElementById('seq-step').value) || 10;
+                        
+                        // 백엔드의 app_state에 직접 저장하기 위해 시퀀스 API 호출
+                        // 하지만 실제로는 실행되지 않도록 백엔드에서 처리해야 함
+                        // 일단 설정 저장 API를 통해 저장
+                        try {
+                            await fetch('/api/settings', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    sequence_start: start,
+                                    sequence_end: end,
+                                    sequence_step: step
+                                })
+                            });
+                        } catch (err) {
+                            console.error('시퀀스 설정 저장 실패:', err);
+                        }
+                    }, 1000);
+                });
+            });
+        });
+
+        // 이미지 캡처
+        async function captureImage() {
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '💾 저장 중...';
+                
+                const response = await fetch('/api/capture', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('success', `${data.saved_count}개 이미지가 저장되었습니다.`);
+                    updateStatus();
+                } else {
+                    showAlert('error', data.message || '촬영 실패');
+                }
+                
+                btn.disabled = false;
+                btn.textContent = '📸 현재 설정으로 1회 촬영';
+            } catch (error) {
+                showAlert('error', '촬영 실패: ' + error.message);
+                event.target.disabled = false;
+                event.target.textContent = '📸 현재 설정으로 1회 촬영';
+            }
+        }
+
+        // 시퀀스 시작
+        async function startSequence() {
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '⏳ 시퀀스 실행 중...';
+                
+                const start = parseInt(document.getElementById('seq-start').value);
+                const end = parseInt(document.getElementById('seq-end').value);
+                const step = parseInt(document.getElementById('seq-step').value);
+                
+                const response = await fetch('/api/sequence', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({start, end, step})
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showAlert('success', '시퀀스 촬영이 시작되었습니다.');
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = '🔄 시퀀스 시작';
+                        updateStatus();
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || '시퀀스 시작 실패');
+                }
+            } catch (error) {
+                showAlert('error', '시퀀스 시작 실패: ' + error.message);
+                event.target.disabled = false;
+                event.target.textContent = '🔄 시퀀스 시작';
+            }
+        }
+
+        // 알림 표시
+        function showAlert(type, message) {
+            const alertId = type === 'success' ? 'success-alert' : 'error-alert';
+            const alert = document.getElementById(alertId);
+            alert.textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+
+        // 카메라 크기 설정 함수
+        function setCameraSize(width, height) {
+            const cameraItems = document.querySelectorAll('.camera-item');
+            cameraItems.forEach(item => {
+                item.style.width = width + 'px';
+                item.style.height = height + 'px';
+            });
+        }
+
+        // 카메라 크기 조정 핸들 초기화
+        function initCameraResize() {
+            const handle = document.getElementById('camera-resize-handle');
+            const cameraGrid = document.getElementById('camera-grid');
+            const previewArea = document.querySelector('.preview-area');
+            let isResizing = false;
+            let startX, startY, startWidth, startHeight;
+
+            handle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const firstItem = document.querySelector('.camera-item');
+                startWidth = parseInt(window.getComputedStyle(firstItem).width, 10);
+                startHeight = parseInt(window.getComputedStyle(firstItem).height, 10);
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                // 그리드의 최대 너비 계산 (4개 컬럼 + 3개 gap)
+                const gridRect = cameraGrid.getBoundingClientRect();
+                const maxWidth = gridRect.width - 45; // gap 15px * 3
+                const minWidth = 150;
+                const minHeight = 100;
+                const maxHeight = 600;
+
+                let newWidth = startWidth + deltaX;
+                let newHeight = startHeight + deltaY;
+
+                // 너비 제한 (오른쪽으로 벗어나지 않도록)
+                if (newWidth > maxWidth) newWidth = maxWidth;
+                if (newWidth < minWidth) newWidth = minWidth;
+
+                // 높이 제한
+                if (newHeight > maxHeight) newHeight = maxHeight;
+                if (newHeight < minHeight) newHeight = minHeight;
+
+                // 모든 카메라 아이템에 같은 크기 적용
+                setCameraSize(newWidth, newHeight);
+            });
+
+            document.addEventListener('mouseup', async () => {
+                if (!isResizing) return;
+                isResizing = false;
+
+                // 크기 저장
+                const firstItem = document.querySelector('.camera-item');
+                const width = parseInt(window.getComputedStyle(firstItem).width, 10);
+                const height = parseInt(window.getComputedStyle(firstItem).height, 10);
+
+                try {
+                    await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            camera_width: width,
+                            camera_height: height
+                        })
+                    });
+                } catch (err) {
+                    console.error('카메라 크기 저장 실패:', err);
+                }
+            });
+        }
+
+        // 초기화
+        window.addEventListener('load', () => {
+            connectWebSocket();
+            updateStatus();
+            initCameraResize();
+            setInterval(updateStatus, 5000); // 5초마다 상태 업데이트
+        });
+    </script>
+</body>
+</html>

@@ -4,4 +4,23 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "numpy>=2.4.1",
+    "opencv-python>=4.13.0.90",
+    "pymodbus>=3.11.4",
+    "pypylon>=4.2.0",
+    "pyserial>=3.5",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "websockets>=14.0",
+    "pyside6>=6.8.0",
+]
+
+[project.scripts]
+data_get = "src.data_get.cli:main"
+
+[tool.setuptools]
+packages = ["src", "src.data_get"]
+
+[tool.setuptools.package-dir]
+"" = "."

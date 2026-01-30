@@ -1,0 +1,107 @@
+{
+  "description": "데이터 저장 폴더 구조 정의",
+  "base_path": "./captured_images",
+  "folder_structure": {
+    "standard_path": "{base_path}/{product}/{condition}/{light_condition}/",
+    "cam3_path": "{base_path}/cam3/{product}/{condition}/{light_condition}/",
+    "description": "표준 경로는 Cam 1, 2, 4를 저장하고, cam3 경로는 Cam 3만 저장합니다."
+  },
+  "file_naming": {
+    "pattern": "{product}_{condition}_{light_condition}_{shot_no:03d}_Cam{cam_id}_{timestamp}.png",
+    "example": "ModelA_Test_A_Light_100_001_Cam1_20240101_120000.png",
+    "components": {
+      "product": "제품명 (예: ModelA)",
+      "condition": "검사 조건 (예: Test_A)",
+      "light_condition": "조명 조건 (예: Light_100, Light_030)",
+      "shot_no": "촬영 번호 (3자리 숫자, 예: 001)",
+      "cam_id": "카메라 ID (1, 2, 3, 4)",
+      "timestamp": "타임스탬프 (YYYYMMDD_HHMMSS 형식)"
+    }
+  },
+  "save_modes": {
+    "1": {
+      "name": "Cam 3 저장 안함",
+      "description": "Cam 1, 2, 4만 저장",
+      "save_paths": ["standard_path"],
+      "cameras": [1, 2, 4]
+    },
+    "2": {
+      "name": "Cam 3도 저장하기 (전체)",
+      "description": "모든 카메라 저장",
+      "save_paths": ["standard_path", "cam3_path"],
+      "cameras": [1, 2, 3, 4]
+    },
+    "3": {
+      "name": "Cam 3만 저장하기",
+      "description": "Cam 3만 저장",
+      "save_paths": ["cam3_path"],
+      "cameras": [3]
+    }
+  },
+  "example_structure": {
+    "captured_images": {
+      "ModelA": {
+        "Test_A": {
+          "Light_030": [
+            "ModelA_Test_A_Light_030_001_Cam1_20240101_120000.png",
+            "ModelA_Test_A_Light_030_001_Cam2_20240101_120000.png",
+            "ModelA_Test_A_Light_030_001_Cam4_20240101_120000.png"
+          ],
+          "Light_040": [],
+          "Light_100": []
+        }
+      }
+    },
+    "cam3": {
+      "ModelA": {
+        "Test_A": {
+          "Light_030": [
+            "ModelA_Test_A_Light_030_001_Cam3_20240101_120000.png"
+          ],
+          "Light_040": [],
+          "Light_100": []
+        }
+      }
+    }
+  },
+  "path_examples": {
+    "mode_1": {
+      "cam1": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam1_20240101_120000.png",
+      "cam2": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam2_20240101_120000.png",
+      "cam3": "저장 안됨",
+      "cam4": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam4_20240101_120000.png"
+    },
+    "mode_2": {
+      "cam1": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam1_20240101_120000.png",
+      "cam2": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam2_20240101_120000.png",
+      "cam3": "./captured_images/cam3/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam3_20240101_120000.png",
+      "cam4": "./captured_images/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam4_20240101_120000.png"
+    },
+    "mode_3": {
+      "cam1": "저장 안됨",
+      "cam2": "저장 안됨",
+      "cam3": "./captured_images/cam3/ModelA/Test_A/Light_100/ModelA_Test_A_Light_100_001_Cam3_20240101_120000.png",
+      "cam4": "저장 안됨"
+    }
+  },
+  "light_condition_format": {
+    "pattern": "Light_{value:03d}",
+    "description": "조명 값은 3자리 숫자로 포맷됩니다 (예: Light_030, Light_100, Light_255)",
+    "range": [0, 255]
+  },
+  "sequence_behavior": {
+    "description": "자동 시퀀스 촬영 시 조명 값을 변경하면서 각 조명 조건별로 폴더가 생성됩니다",
+    "example": {
+      "start": 30,
+      "end": 120,
+      "step": 10,
+      "created_folders": [
+        "Light_030",
+        "Light_040",
+        "Light_050",
+        "...",
+        "Light_120"
+      ]
+    }
+  }
+}
